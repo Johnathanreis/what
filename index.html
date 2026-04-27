@@ -72,7 +72,7 @@ border-radius:16px;
 padding:16px;
 }
 
-/* 🔥 remove fundo branco do áudio */
+/* remove fundo do áudio */
 .audio-message.bot{
 background:transparent !important;
 padding:0 !important;
@@ -201,6 +201,7 @@ const options = document.getElementById("options");
 
 let audioCount = 0;
 
+/* digitando */
 function showTyping(){
 const div=document.createElement("div");
 div.className="msg bot";
@@ -210,6 +211,7 @@ chat.scrollTop=chat.scrollHeight;
 return div;
 }
 
+/* mensagem */
 function addMessage(text,type){
 const typing = showTyping();
 
@@ -226,6 +228,7 @@ chat.scrollTop=chat.scrollHeight;
 },600);
 }
 
+/* plano */
 function showPlanBanner(){
 const wrapper=document.createElement("div");
 wrapper.className="msg bot";
@@ -263,7 +266,6 @@ btn.innerText="Escolher "+p.label;
 }
 
 btn.onclick=()=>{
-if(navigator.vibrate){navigator.vibrate(30);}
 addMessage(p.label,"user");
 flows.redirect(p.value);
 };
@@ -274,6 +276,7 @@ options.appendChild(btn);
 },1200);
 }
 
+/* gravação */
 function showRecording(){
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
@@ -301,7 +304,9 @@ chat.appendChild(wrapper);
 return wrapper;
 }
 
+/* 🔥 AUDIO FUNCIONAL */
 function addAudioMessage(src){
+
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -318,6 +323,10 @@ playBtn.innerText="▶";
 
 const progress=document.createElement("input");
 progress.type="range";
+progress.value=0;
+progress.min=0;
+progress.max=100;
+progress.step=0.1;
 progress.className="audio-progress";
 
 const time=document.createElement("span");
@@ -325,10 +334,25 @@ time.className="audio-time";
 time.innerText="0:00";
 
 const audio=new Audio(src);
+audio.preload="metadata";
+
+audio.addEventListener("loadedmetadata",()=>{
+if(!isNaN(audio.duration)){
+const min=Math.floor(audio.duration/60);
+const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
+time.innerText=`${min}:${sec}`;
+}
+});
 
 audio.addEventListener("timeupdate",()=>{
 if(audio.duration){
 progress.value=(audio.currentTime/audio.duration)*100;
+}
+});
+
+progress.addEventListener("input",()=>{
+if(audio.duration){
+audio.currentTime=(progress.value/100)*audio.duration;
 }
 });
 
@@ -342,11 +366,34 @@ playBtn.innerText="▶";
 }
 };
 
+audio.addEventListener("ended",()=>{
+playBtn.innerText="▶";
+progress.value=0;
+});
+
 audioBox.append(playBtn,progress,time);
 wrapper.append(avatar,audioBox);
 chat.appendChild(wrapper);
 }
 
+/* opções */
+function renderOptions(opts){
+options.innerHTML="";
+opts.forEach(o=>{
+const btn=document.createElement("button");
+btn.innerText=o.label;
+
+btn.onclick=()=>{
+addMessage(o.label,"user");
+options.innerHTML="";
+flows[o.next]();
+};
+
+options.appendChild(btn);
+});
+}
+
+/* audios */
 const audioMap={
 start:"audio1.mp3",
 q1:"audio2.mp3",
@@ -355,6 +402,7 @@ q3:"audio4.mp3",
 oferta:"audio5.mp3"
 };
 
+/* fluxo */
 function botFlow(messages,nextOptions,audioSrc){
 
 audioCount++;
@@ -398,7 +446,7 @@ continueMessages();
 nextMessage();
 }
 
-/* 🔥 ALTERAÇÃO PRINCIPAL */
+/* flows */
 const flows={
 
 start:()=>botFlow([
@@ -421,8 +469,8 @@ q3:()=>botFlow([
 "Voce quer resolver isso com discricao?"
 ],[{label:"Sim",next:"oferta"}],audioMap.q3),
 
-/* 🔥 DIRETO PARA O PLANO */
-oferta:()=>botFlow([],null,audioMap.oferta),
+/* 🔥 direto pro plano */
+oferta:()=>botFlow([], null, audioMap.oferta),
 
 redirect:(plano)=>{
 const links={
