@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atendimento Urológico Guiado</title>
+  <meta name="description" content="Atendimento guiado sobre saúde íntima masculina com orientação informativa e encaminhamento para avaliação especializada." />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0b141a;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      height: 92vh;
+      max-height: 860px;
+      background: #efeae2;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .topbar {
+      background: #075e54;
+      color: #fff;
+      padding: 14px 14px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#d9fff6,#7ed7c1);
+      display: grid;
+      place-items: center;
+      color: #075e54;
+      font-weight: 800;
+    }
+    .doctor-info { flex: 1; }
+    .doctor-info strong { display: block; font-size: 15px; line-height: 1.2; }
+    .doctor-info span { display: block; font-size: 12px; opacity: .85; margin-top: 2px; }
+    .secure-badge {
+      font-size: 11px;
+      background: rgba(255,255,255,.15);
+      padding: 5px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .notice {
+      background: #fff7d1;
+      color: #5b4a00;
+      font-size: 11px;
+      line-height: 1.35;
+      padding: 9px 13px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+    .chat {
+      flex: 1;
+      padding: 16px 12px 120px;
+      overflow-y: auto;
+      background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .msg-wrap { display: flex; margin: 8px 0; animation: fadeUp .25s ease both; }
+    .msg-wrap.bot { justify-content: flex-start; }
+    .msg-wrap.user { justify-content: flex-end; }
+    .msg {
+      max-width: 82%;
+      padding: 9px 11px 7px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.38;
+      box-shadow: 0 1px 1px rgba(0,0,0,.08);
+      position: relative;
+      white-space: pre-line;
+    }
+    .bot .msg { background: #fff; border-top-left-radius: 3px; }
+    .user .msg { background: #dcf8c6; border-top-right-radius: 3px; }
+    .time { display: block; font-size: 10px; color: #667781; text-align: right; margin-top: 4px; }
+    .typing {
+      width: 58px;
+      background: #fff;
+      padding: 12px 11px;
+      border-radius: 12px;
+      border-top-left-radius: 3px;
+      display: flex;
+      gap: 4px;
+      margin: 8px 0;
+    }
+    .typing i {
+      width: 7px;
+      height: 7px;
+      background: #999;
+      border-radius: 50%;
+      animation: blink 1s infinite ease-in-out;
+    }
+    .typing i:nth-child(2) { animation-delay: .15s; }
+    .typing i:nth-child(3) { animation-delay: .3s; }
+    .options {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(239,234,226,0), #efeae2 18%);
+      padding: 32px 12px 14px;
+      display: grid;
+      gap: 8px;
+    }
+    .option-btn, .cta-btn, .restart-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    .option-btn {
+      background: #fff;
+      color: #075e54;
+      border: 1px solid rgba(7,94,84,.2);
+      text-align: left;
+    }
+    .option-btn:hover, .cta-btn:hover, .restart-btn:hover { transform: translateY(-1px); }
+    .cta-btn {
+      background: #128c7e;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .restart-btn { background: #e7f3ef; color: #075e54; }
+    .audio-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 220px;
+    }
+    .play-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #075e54;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .wave {
+      flex: 1;
+      height: 18px;
+      background: repeating-linear-gradient(90deg, #9aa5a1 0 3px, transparent 3px 7px);
+      opacity: .7;
+      border-radius: 999px;
+    }
+    .small { font-size: 12px; color: #667781; margin-top: 5px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes blink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-2px); } }
+    @media (max-width: 460px) {
+      body { padding: 0; background: #efeae2; }
+      .phone { height: 100vh; max-height: none; border-radius: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <header class="topbar">
+      <div class="avatar">Dr</div>
+      <div class="doctor-info">
+        <strong>Atendimento Urológico</strong>
+        <span>Orientação guiada • resposta em poucos minutos</span>
+      </div>
+      <div class="secure-badge">18+</div>
+    </header>
+
+    <div class="notice">
+      Este atendimento é informativo e não substitui consulta médica. Não informe dados sensíveis. Em caso de dor, piora súbita ou uso de medicamentos contínuos, procure atendimento profissional.
+    </div>
+
+    <section id="chat" class="chat" aria-live="polite"></section>
+    <section id="options" class="options"></section>
+  </main>
+
+  <script>
+    const CONFIG = {
+      checkoutUrl: "https://SEU-LINK-DE-CHECKOUT-AQUI.com",
+      whatsappUrl: "https://wa.me/5500000000000?text=Ol%C3%A1%2C%20vim%20pelo%20atendimento%20urol%C3%B3gico%20guiado%20e%20quero%20saber%20mais.",
+      useAudio: true,
+      audioBasePath: "assets/audio/"
+    };
+
+    const flows = {
+      start: {
+        bot: [
+          { text: "Olá. Sou o atendimento guiado do Dr. responsável pela triagem urológica inicial.", audio: "01-boas-vindas.mp3" },
+          { text: "Vou fazer algumas perguntas rápidas para entender o seu momento e indicar o melhor caminho com segurança." },
+          { text: "Para começar: qual tema você deseja avaliar hoje?" }
+        ],
+        options: [
+          { label: "Controle e desempenho masculino", next: "controle" },
+          { label: "Dificuldade de manter firmeza", next: "firmeza" },
+          { label: "Queda de energia, confiança ou disposição", next: "energia" },
+          { label: "Quero uma avaliação geral", next: "geral" }
+        ]
+      },
+      controle: {
+        user: "Controle e desempenho masculino",
+        bot: [
+          { text: "Entendi. Esse é um tema comum na saúde masculina adulta e pode envolver rotina, ansiedade, circulação, sono e outros fatores." , audio: "02-controle.mp3"},
+          { text: "A recomendação precisa considerar frequência, tempo de evolução e histórico de saúde." },
+          { text: "Isso acontece há quanto tempo?" }
+        ],
+        options: [
+          { label: "Começou recentemente", next: "tempo_recente" },
+          { label: "Já acontece há alguns meses", next: "tempo_meses" },
+          { label: "É algo recorrente há bastante tempo", next: "tempo_longo" }
+        ]
+      },
+      firmeza: {
+        user: "Dificuldade de manter firmeza",
+        bot: [
+          { text: "Entendi. Alterações de firmeza podem ter relação com circulação, estresse, sono, uso de substâncias, medicamentos ou condições metabólicas." , audio: "03-firmeza.mp3"},
+          { text: "A ideia aqui não é rotular o problema, mas entender o contexto para orientar com responsabilidade." },
+          { text: "Como você descreveria a situação?" }
+        ],
+        options: [
+          { label: "Acontece às vezes", next: "frequencia_asvezes" },
+          { label: "Acontece com frequência", next: "frequencia_frequente" },
+          { label: "Prefiro uma orientação mais discreta", next: "discreto" }
+        ]
+      },
+      energia: {
+        user: "Queda de energia, confiança ou disposição",
+        bot: [
+          { text: "Perfeito. Energia e confiança também fazem parte da saúde masculina e podem influenciar o desempenho íntimo." , audio: "04-energia.mp3"},
+          { text: "Antes de qualquer recomendação, é importante separar cansaço pontual de um padrão persistente." },
+          { text: "Qual frase se aproxima mais do seu momento?" }
+        ],
+        options: [
+          { label: "Tenho rotina cansativa e pouco sono", next: "rotina" },
+          { label: "Sinto queda de disposição com frequência", next: "disposicao" },
+          { label: "Quero melhorar minha performance com mais segurança", next: "performance" }
+        ]
+      },
+      geral: {
+        user: "Quero uma avaliação geral",
+        bot: [
+          { text: "Ótimo. Vamos fazer uma triagem ampla, sem exposição e sem perguntas invasivas." , audio: "05-geral.mp3"},
+          { text: "O objetivo é entender se faz sentido avançar para uma recomendação de suporte masculino ou se é melhor procurar avaliação médica direta." },
+          { text: "Você usa algum medicamento contínuo ou tem condição cardiovascular conhecida?" }
+        ],
+        options: [
+          { label: "Não", next: "sem_risco" },
+          { label: "Sim", next: "risco" },
+          { label: "Não sei responder", next: "risco" }
+        ]
+      },
+      tempo_recente: makeMiddle("Quando começa recentemente, a orientação costuma focar em rotina, ansiedade, sono e suporte inicial. Ainda assim, é importante observar evolução."),
+      tempo_meses: makeMiddle("Quando o quadro permanece por meses, a recomendação deve ser mais estruturada. O ideal é combinar orientação segura, acompanhamento e hábitos de base."),
+      tempo_longo: makeMiddle("Quando é recorrente há bastante tempo, vale ter mais cautela. Um suporte pode ajudar, mas avaliação médica é especialmente recomendada."),
+      frequencia_asvezes: makeMiddle("Quando acontece às vezes, o primeiro passo é entender gatilhos: estresse, sono, álcool, pressão emocional ou rotina intensa."),
+      frequencia_frequente: makeMiddle("Quando acontece com frequência, a orientação precisa ser mais cuidadosa. Existem alternativas de suporte, mas o histórico de saúde importa."),
+      discreto: makeMiddle("Sem problema. A triagem foi pensada para ser discreta, direta e sem exposição. Vamos seguir apenas com critérios de segurança."),
+      rotina: makeMiddle("Rotina cansativa e pouco sono podem impactar energia, foco e resposta corporal. A recomendação deve começar por suporte e ajuste de base."),
+      disposicao: makeMiddle("Queda frequente de disposição merece atenção. Pode envolver sono, alimentação, estresse, circulação, hormônios ou outros fatores."),
+      performance: makeMiddle("Performance com segurança exige critério. A melhor abordagem evita promessas rápidas e trabalha com suporte, consistência e avaliação quando necessário."),
+      sem_risco: {
+        user: "Não",
+        bot: [
+          { text: "Perfeito. Com base nas respostas, você pode avançar para conhecer uma recomendação de suporte masculino voltada para saúde, controle e confiança." , audio: "08-recomendacao.mp3"},
+          { text: "A recomendação não substitui consulta médica, mas pode ser um primeiro passo para quem busca uma abordagem discreta e estruturada." },
+          { text: "Quer ver a recomendação agora?" }
+        ],
+        options: [
+          { label: "Ver recomendação indicada", next: "final" },
+          { label: "Prefiro falar com atendimento", next: "whatsapp" },
+          { label: "Refazer triagem", next: "restart" }
+        ]
+      },
+      risco: {
+        user: "Sim ou não sei responder",
+        bot: [
+          { text: "Nesse caso, a orientação mais segura é falar com um profissional antes de usar qualquer produto." , audio: "09-seguranca.mp3"},
+          { text: "Condições cardiovasculares, medicamentos contínuos e histórico clínico precisam ser avaliados individualmente." },
+          { text: "Você pode chamar o atendimento para receber orientação responsável sobre os próximos passos." }
+        ],
+        options: [
+          { label: "Falar com atendimento", next: "whatsapp" },
+          { label: "Refazer triagem", next: "restart" }
+        ]
+      },
+      final: {
+        user: "Ver recomendação indicada",
+        bot: [
+          { text: "Recomendação liberada.", audio: "10-final.mp3" },
+          { text: "O próximo passo é acessar a página do produto, conferir composição, orientações de uso, restrições e condições de compra." },
+          { text: "Importante: não utilize nenhum produto caso tenha contraindicação, use medicamentos contínuos ou tenha dúvidas clínicas sem orientação profissional." }
+        ],
+        options: [
+          { label: "Acessar recomendação", type: "checkout" },
+          { label: "Falar antes com atendimento", type: "whatsapp" },
+          { label: "Refazer triagem", next: "restart" }
+        ]
+      },
+      whatsapp: {
+        user: "Prefiro falar com atendimento",
+        bot: [
+          { text: "Claro. O atendimento pode orientar o próximo passo com mais segurança e privacidade." }
+        ],
+        options: [
+          { label: "Abrir WhatsApp", type: "whatsapp" },
+          { label: "Refazer triagem", next: "restart" }
+        ]
+      },
+      restart: {
+        user: "Refazer triagem",
+        bot: [],
+        options: []
+      }
+    };
+
+    function makeMiddle(text) {
+      return {
+        user: null,
+        bot: [
+          { text, audio: "06-analise.mp3" },
+          { text: "Antes de seguir, preciso confirmar um ponto de segurança." },
+          { text: "Você usa algum medicamento contínuo ou tem condição cardiovascular conhecida?" }
+        ],
+        options: [
+          { label: "Não", next: "sem_risco" },
+          { label: "Sim", next: "risco" },
+          { label: "Não sei responder", next: "risco" }
+        ]
+      };
+    }
+
+    const chat = document.getElementById("chat");
+    const options = document.getElementById("options");
+
+    function now() {
+      return new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function scrollBottom() {
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addMessage(text, sender = "bot") {
+      const wrap = document.createElement("div");
+      wrap.className = `msg-wrap ${sender}`;
+      const msg = document.createElement("div");
+      msg.className = "msg";
+      msg.innerHTML = `${escapeHtml(text)}<span class="time">${now()}</span>`;
+      wrap.appendChild(msg);
+      chat.appendChild(wrap);
+      scrollBottom();
+    }
+
+    function addAudio(fileName) {
+      if (!CONFIG.useAudio || !fileName) return;
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap bot";
+      const msg = document.createElement("div");
+      msg.className = "msg";
+      const audioSrc = CONFIG.audioBasePath + fileName;
+      msg.innerHTML = `
+        <div class="audio-box">
+          <button class="play-btn" aria-label="Reproduzir áudio">▶</button>
+          <div class="wave"></div>
+          <span class="small">áudio</span>
+        </div>
+        <audio src="${audioSrc}"></audio>
+        <span class="time">${now()}</span>
+      `;
+      const btn = msg.querySelector("button");
+      const audio = msg.querySelector("audio");
+      btn.addEventListener("click", () => {
+        if (audio.paused) { audio.play(); btn.textContent = "❚❚"; }
+        else { audio.pause(); btn.textContent = "▶"; }
+      });
+      audio.addEventListener("ended", () => btn.textContent = "▶");
+      wrap.appendChild(msg);
+      chat.appendChild(wrap);
+      scrollBottom();
+    }
+
+    function typingDelay() {
+      return new Promise(resolve => {
+        const typing = document.createElement("div");
+        typing.className = "typing";
+        typing.innerHTML = "<i></i><i></i><i></i>";
+        chat.appendChild(typing);
+        scrollBottom();
+        setTimeout(() => { typing.remove(); resolve(); }, 650);
+      });
+    }
+
+    async function botSequence(messages) {
+      for (const item of messages) {
+        await typingDelay();
+        if (item.audio) addAudio(item.audio);
+        addMessage(item.text, "bot");
+      }
+    }
+
+    function renderOptions(items) {
+      options.innerHTML = "";
+      items.forEach(item => {
+        if (item.type === "checkout") {
+          const a = document.createElement("a");
+          a.className = "cta-btn";
+          a.href = CONFIG.checkoutUrl;
+          a.textContent = item.label;
+          a.target = "_blank";
+          options.appendChild(a);
+          return;
+        }
+        if (item.type === "whatsapp") {
+          const a = document.createElement("a");
+          a.className = "cta-btn";
+          a.href = CONFIG.whatsappUrl;
+          a.textContent = item.label;
+          a.target = "_blank";
+          options.appendChild(a);
+          return;
+        }
+        const btn = document.createElement("button");
+        btn.className = item.next === "restart" ? "restart-btn" : "option-btn";
+        btn.textContent = item.label;
+        btn.addEventListener("click", () => go(item.next, item.label));
+        options.appendChild(btn);
+      });
+    }
+
+    async function go(stepId, clickedLabel) {
+      if (clickedLabel) addMessage(clickedLabel, "user");
+      if (stepId === "restart") {
+        chat.innerHTML = "";
+        return start();
+      }
+      const step = flows[stepId];
+      options.innerHTML = "";
+      await botSequence(step.bot || []);
+      renderOptions(step.options || []);
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>'"]/g, tag => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[tag]));
+    }
+
+    async function start() {
+      await botSequence(flows.start.bot);
+      renderOptions(flows.start.options);
+    }
+
+    start();
+  </script>
+</body>
+</html>
