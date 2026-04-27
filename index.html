@@ -18,7 +18,13 @@
 </head>
 <body>
 <div class="phone">
-  <div class="topbar">Atendimento Urológico</div>
+  <div class="topbar" style="display:flex; align-items:center; gap:10px;">
+  <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200&auto=format&fit=crop" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+  <div>
+    <div>Dr. Rafael • Urologia</div>
+    <small style="font-size:11px; opacity:0.8;">online agora</small>
+  </div>
+</div>
   <div id="chat" class="chat"></div>
   <div id="options" class="options"></div>
 </div>
@@ -38,10 +44,33 @@ function addMessage(text, type){
 function delay(ms){ return new Promise(r=>setTimeout(r,5000)); }
 
 async function botFlow(messages, nextOptions){
-  for(const msg of messages){
+  for(let i = 0; i < messages.length; i++){
+    const msg = messages[i];
+
+    // typing indicator
+    const typing = document.createElement("div");
+    typing.className = "msg bot";
+    typing.innerText = "digitando...";
+    chat.appendChild(typing);
+    chat.scrollTop = chat.scrollHeight;
+
     await delay(5000);
+
+    typing.remove();
+
+    // adiciona mensagem
     addMessage(msg, "bot");
+
+    // 🔥 garante pequeno delay entre mensagens para não colar tudo
+    if(i < messages.length - 1){
+      await delay(1500);
+    }
   }
+
+  renderOptions(nextOptions);
+}
+  renderOptions(nextOptions);
+}
   renderOptions(nextOptions);
 }
 
@@ -61,46 +90,54 @@ function renderOptions(opts){
 
 const flows = {
   start: ()=> botFlow([
-    "Vou ser direto...",
-    "Isso já aconteceu mais de uma vez?"
+    "Olá, sou o Dr. Rafael.",
+    "Vou te ajudar de forma rápida e discreta.",
+    "Posso te fazer algumas perguntas?"
   ],[
-    {label:"Sim", next:"freq"},
-    {label:"Não", next:"pontual"}
+    {label:"Sim", next:"triagem1"},
+    {label:"Pode falar", next:"triagem1"}
   ]),
 
-  freq: ()=> botFlow([
+  triagem1: ()=> botFlow([
+    "Isso vem acontecendo com frequência?"
+  ],[
+    {label:"Sim", next:"triagem2"},
+    {label:"Às vezes", next:"triagem2"}
+  ]),
+
+  triagem2: ()=> botFlow([
     "Entendi.",
-    "Isso mexe com sua confiança?",
-    "Se tivesse solução discreta, testaria?"
+    "Isso já afetou sua confiança ou desempenho?"
   ],[
-    {label:"Sim", next:"interesse"},
-    {label:"Talvez", next:"interesse"}
+    {label:"Sim", next:"triagem3"},
+    {label:"Um pouco", next:"triagem3"}
   ]),
 
-  pontual: ()=> botFlow([
-    "Ok.",
-    "Mas você quer evitar que isso volte?",
-    "Prefere prevenir antes de piorar?"
+  triagem3: ()=> botFlow([
+    "Certo.",
+    "Você busca uma solução discreta e segura?"
   ],[
     {label:"Sim", next:"interesse"},
-    {label:"Sim, prevenir", next:"interesse"}
+    {label:"Sim, com certeza", next:"interesse"}
   ]),
 
   interesse: ()=> botFlow([
     "Perfeito.",
-    "Existe um protocolo discreto que muitos estão usando.",
+    "Existe um protocolo que tem ajudado muitos homens.",
+    "Totalmente discreto.",
     "Sem exposição.",
-    "Pagamento só na entrega.",
-    "Quer ver como funciona?"
+    "Quer entender como funciona?"
   ],[
-    {label:"Quero ver", next:"final"}
+    {label:"Quero entender", next:"final"}
   ]),
 
   final: ()=> botFlow([
-    "Aqui está.",
-    "Entrega sigilosa.",
-    "Você só paga quando receber.",
-    "Quer garantir o seu agora?"
+    "Funciona assim.",
+    "Você recebe o produto na sua casa.",
+    "Em embalagem totalmente discreta.",
+    "E só paga no momento da entrega.",
+    "Sem risco.",
+    "Quer solicitar o seu agora?"
   ],[
     {label:"Quero receber", next:"redirect"}
   ]),
