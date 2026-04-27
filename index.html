@@ -23,19 +23,15 @@ body{margin:0;font-family:Arial;background:#0b141a;display:flex;justify-content:
 
 button{
 width:100%;
-margin:4px 0;
-padding:12px;
+margin:6px 0;
+padding:14px;
 border-radius:20px;
 border:none;
 background:#128c7e;
 color:#fff;
-cursor:pointer
+cursor:pointer;
+font-weight:bold;
 }
-
-/* typing */
-.typing{background:#fff;padding:10px;border-radius:10px;width:60px;display:flex;gap:4px}
-.typing div{width:6px;height:6px;background:#999;border-radius:50%;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* audio */
 .audio-message{display:flex;align-items:flex-end;gap:10px}
@@ -83,13 +79,64 @@ const options = document.getElementById("options");
 
 let audioCount = 0;
 
-// mensagem
 function addMessage(text,type){
 const div=document.createElement("div");
 div.className="msg "+type;
 div.innerText=text;
 chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
+}
+
+// imagem
+function showPlanBanner(){
+const wrapper=document.createElement("div");
+wrapper.className="msg bot";
+
+const img=document.createElement("img");
+img.src="plano.png";
+img.style.width="100%";
+img.style.borderRadius="12px";
+
+wrapper.appendChild(img);
+chat.appendChild(wrapper);
+}
+
+// final direto
+function showPlanImage(){
+
+options.innerHTML="";
+
+showPlanBanner();
+
+setTimeout(()=>{
+addMessage("Escolha seu tratamento:","bot");
+
+const planos=[
+{label:"1 MES",value:"1"},
+{label:"2 MESES",value:"2"},
+{label:"3 MESES",value:"3"}
+];
+
+planos.forEach(p=>{
+const btn=document.createElement("button");
+
+if(p.value==="3"){
+btn.innerText="🔥 MAIS ESCOLHIDO - 3 MESES";
+btn.style.background="#ff2d2d";
+}else{
+btn.innerText="Escolher "+p.label;
+}
+
+btn.onclick=()=>{
+addMessage(p.label,"user");
+flows.redirect(p.value);
+};
+
+options.appendChild(btn);
+});
+
+},1200);
+
 }
 
 // gravação
@@ -111,23 +158,17 @@ for(let i=0;i<4;i++){
 wave.appendChild(document.createElement("div"));
 }
 
-const text=document.createElement("span");
-text.innerText="gravando áudio...";
-
 rec.appendChild(wave);
-rec.appendChild(text);
+rec.appendChild(document.createElement("span")).innerText="gravando áudio...";
 
-wrapper.appendChild(avatar);
-wrapper.appendChild(rec);
-
+wrapper.append(avatar,rec);
 chat.appendChild(wrapper);
 
 return wrapper;
 }
 
-// áudio
+// audio
 function addAudioMessage(src){
-
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -151,48 +192,18 @@ time.className="audio-time";
 
 const audio=new Audio(src);
 
-// 🔥 RETORNA DURAÇÃO EM SEGUNDOS
-audio.addEventListener("loadedmetadata",()=>{
-const min=Math.floor(audio.duration/60);
-const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
-time.innerText=`${min}:${sec}`;
-});
-
-// controles
 playBtn.onclick=()=>{
 audio.paused?(audio.play(),playBtn.innerText="⏸"):(audio.pause(),playBtn.innerText="▶");
 };
-
-audio.addEventListener("timeupdate",()=>{
-progress.value=(audio.currentTime/audio.duration)*100;
-});
-
-progress.oninput=()=>{
-audio.currentTime=(progress.value/100)*audio.duration;
-};
-
-audio.addEventListener("ended",()=>{
-playBtn.innerText="▶";
-progress.value=0;
-});
 
 audioBox.append(playBtn,progress,time);
 wrapper.append(avatar,audioBox);
 chat.appendChild(wrapper);
 
-// 🔥 RETORNA O AUDIO PRA USAR O TEMPO
 return audio;
 }
 
-// typing
-function showTyping(){
-const typing=document.createElement("div");
-typing.className="typing";
-typing.innerHTML="<div></div><div></div><div></div>";
-chat.appendChild(typing);
-return typing;
-}
-
+// fluxo
 function renderOptions(opts){
 options.innerHTML="";
 opts.forEach(o=>{
@@ -218,24 +229,19 @@ oferta:"audio5.mp3"
 function botFlow(messages,nextOptions,audioSrc){
 
 audioCount++;
-
 let i=0;
 
 function continueMessages(){
 
 if(i>=messages.length){
 if(nextOptions){renderOptions(nextOptions)}
+else{showPlanImage()}
 return;
 }
 
-const typing=showTyping();
-
-setTimeout(()=>{
-typing.remove();
 addMessage(messages[i],"bot");
 i++;
-setTimeout(continueMessages,2000);
-},1500);
+setTimeout(continueMessages,1500);
 }
 
 function nextMessage(){
@@ -246,33 +252,14 @@ const rec = showRecording();
 
 setTimeout(()=>{
 rec.remove();
+addAudioMessage(audioSrc);
 
-const audio = addAudioMessage(audioSrc);
-
-// 🔥 PRIMEIRO AUDIO
-if(audioCount === 1){
-
-setTimeout(()=>{
-continueMessages();
-},3000);
-
-// 🔥 AUTOMÁTICO BASEADO NA DURAÇÃO
-}else{
-
-audio.addEventListener("loadedmetadata",()=>{
-
-const duration = audio.duration * 1000;
-
-// margem humana (+2s)
-const delay = duration + 2000;
+// 🔥 DELAY AJUSTADO
+const delay = audioCount === 1 ? 3000 : 18000;
 
 setTimeout(()=>{
 continueMessages();
 },delay);
-
-});
-
-}
 
 },5000);
 
@@ -315,14 +302,9 @@ oferta:()=>botFlow([
 "Quer ver como funciona?"
 ],[{label:"Quero ver",next:"final"}],audioMap.oferta),
 
-final:()=>botFlow([
-"Funciona assim.",
-"Voce recebe em casa.",
-"Em embalagem discreta.",
-"E paga so na entrega.",
-"Sem risco.",
-"Agora escolha a duracao do tratamento:"
-],null),
+final:()=>{
+showPlanImage();
+},
 
 redirect:(plano)=>{
 const links={
