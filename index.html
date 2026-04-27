@@ -64,7 +64,7 @@ cursor:pointer
 <div class="phone">
 
 <div class="topbar">
-<img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200&auto=format&fit=crop">
+<img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200">
 <div>
 <div><strong>Dr. Rafael - Urologia</strong></div>
 <small>online agora</small>
@@ -81,9 +81,9 @@ cursor:pointer
 const chat = document.getElementById("chat");
 const options = document.getElementById("options");
 
-// contador de áudios
 let audioCount = 0;
 
+// mensagem
 function addMessage(text,type){
 const div=document.createElement("div");
 div.className="msg "+type;
@@ -121,13 +121,13 @@ wrapper.appendChild(avatar);
 wrapper.appendChild(rec);
 
 chat.appendChild(wrapper);
-chat.scrollTop=chat.scrollHeight;
 
 return wrapper;
 }
 
 // áudio
 function addAudioMessage(src){
+
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -151,12 +151,14 @@ time.className="audio-time";
 
 const audio=new Audio(src);
 
+// 🔥 RETORNA DURAÇÃO EM SEGUNDOS
 audio.addEventListener("loadedmetadata",()=>{
 const min=Math.floor(audio.duration/60);
 const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
 time.innerText=`${min}:${sec}`;
 });
 
+// controles
 playBtn.onclick=()=>{
 audio.paused?(audio.play(),playBtn.innerText="⏸"):(audio.pause(),playBtn.innerText="▶");
 };
@@ -177,9 +179,12 @@ progress.value=0;
 audioBox.append(playBtn,progress,time);
 wrapper.append(avatar,audioBox);
 chat.appendChild(wrapper);
-chat.scrollTop=chat.scrollHeight;
+
+// 🔥 RETORNA O AUDIO PRA USAR O TEMPO
+return audio;
 }
 
+// typing
 function showTyping(){
 const typing=document.createElement("div");
 typing.className="typing";
@@ -241,14 +246,33 @@ const rec = showRecording();
 
 setTimeout(()=>{
 rec.remove();
-addAudioMessage(audioSrc);
 
-// 🔥 delay inteligente
-const delay = audioCount === 1 ? 3000 : 26000;
+const audio = addAudioMessage(audioSrc);
+
+// 🔥 PRIMEIRO AUDIO
+if(audioCount === 1){
+
+setTimeout(()=>{
+continueMessages();
+},3000);
+
+// 🔥 AUTOMÁTICO BASEADO NA DURAÇÃO
+}else{
+
+audio.addEventListener("loadedmetadata",()=>{
+
+const duration = audio.duration * 1000;
+
+// margem humana (+2s)
+const delay = duration + 2000;
 
 setTimeout(()=>{
 continueMessages();
 },delay);
+
+});
+
+}
 
 },5000);
 
