@@ -41,7 +41,7 @@ function addMessage(text, type){
   chat.scrollTop = chat.scrollHeight;
 }
 
-function delay(ms){ return new Promise(r=>setTimeout(r,5000)); }
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function botFlow(messages, nextOptions){
   for(let i = 0; i < messages.length; i++){
