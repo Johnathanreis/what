@@ -9,6 +9,7 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#0b141a;display:flex;justify-content:center;align-items:center;height:100vh}
 .phone{width:100%;max-width:420px;height:100vh;background:#efeae2;display:flex;flex-direction:column}
+
 .topbar{background:#075e54;color:#fff;padding:10px;display:flex;align-items:center;gap:10px}
 .topbar img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 
@@ -31,74 +32,30 @@ color:#fff;
 cursor:pointer
 }
 
-.typing{
-background:#fff;
-padding:10px;
-border-radius:10px;
-width:60px;
-display:flex;
-gap:4px
-}
+/* typing */
+.typing{background:#fff;padding:10px;border-radius:10px;width:60px;display:flex;gap:4px}
+.typing div{width:6px;height:6px;background:#999;border-radius:50%;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 
-.typing div{
-width:6px;
-height:6px;
-background:#999;
-border-radius:50%;
-animation:blink 1s infinite
-}
+/* audio */
+.audio-message{display:flex;align-items:flex-end;gap:10px}
+.audio-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.audio-box{flex:1;background:#e4e6eb;border-radius:18px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.audio-play{border:none;background:none;font-size:22px;cursor:pointer;color:#128c7e}
+.audio-progress{flex:1;accent-color:#128c7e}
+.audio-time{font-size:12px;color:#555;min-width:40px;text-align:right}
 
-@keyframes blink{
-0%,100%{opacity:.3}
-50%{opacity:1}
-}
+/* recording */
+.recording{display:flex;align-items:center;gap:10px;background:#e4e6eb;border-radius:18px;padding:10px 12px}
+.recording-wave{display:flex;gap:3px}
+.recording-wave div{width:3px;height:10px;background:#999;animation:wave 1s infinite ease-in-out}
+.recording-wave div:nth-child(2){animation-delay:.2s}
+.recording-wave div:nth-child(3){animation-delay:.4s}
+.recording-wave div:nth-child(4){animation-delay:.6s}
 
-/* 🔥 AUDIO WHATSAPP */
-
-.audio-message{
-display:flex;
-align-items:flex-end;
-gap:10px;
-max-width:100%;
-}
-
-.audio-avatar{
-width:48px;
-height:48px;
-border-radius:50%;
-object-fit:cover;
-flex-shrink:0;
-}
-
-.audio-box{
-flex:1;
-background:#e4e6eb;
-border-radius:18px;
-padding:10px 12px;
-display:flex;
-align-items:center;
-gap:10px;
-min-height:48px;
-}
-
-.audio-play{
-border:none;
-background:none;
-font-size:18px;
-cursor:pointer;
-color:#128c7e;
-}
-
-.audio-progress{
-flex:1;
-accent-color:#128c7e;
-}
-
-.audio-time{
-font-size:12px;
-color:#555;
-min-width:40px;
-text-align:right;
+@keyframes wave{
+0%,100%{transform:scaleY(.5)}
+50%{transform:scaleY(1.5)}
 }
 </style>
 </head>
@@ -132,27 +89,59 @@ chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
 }
 
-// 🔥 AUDIO CORRIGIDO
+// gravação
+function showRecording(){
+const wrapper=document.createElement("div");
+wrapper.className="msg bot audio-message";
+
+const avatar=document.createElement("img");
+avatar.src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400";
+avatar.className="audio-avatar";
+
+const rec=document.createElement("div");
+rec.className="recording";
+
+const wave=document.createElement("div");
+wave.className="recording-wave";
+
+for(let i=0;i<4;i++){
+const bar=document.createElement("div");
+wave.appendChild(bar);
+}
+
+const text=document.createElement("span");
+text.innerText="gravando áudio...";
+text.style.fontSize="12px";
+
+rec.appendChild(wave);
+rec.appendChild(text);
+
+wrapper.appendChild(avatar);
+wrapper.appendChild(rec);
+
+chat.appendChild(wrapper);
+chat.scrollTop=chat.scrollHeight;
+
+return wrapper;
+}
+
+// audio
 function addAudioMessage(src){
 
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
-// avatar grande e sem distorção
 const avatar=document.createElement("img");
-avatar.src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop";
+avatar.src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400";
 avatar.className="audio-avatar";
 
-// container áudio
 const audioBox=document.createElement("div");
 audioBox.className="audio-box";
 
-// play
 const playBtn=document.createElement("button");
 playBtn.className="audio-play";
 playBtn.innerText="▶";
 
-// barra
 const progress=document.createElement("input");
 progress.type="range";
 progress.value=0;
@@ -160,12 +149,10 @@ progress.min=0;
 progress.max=100;
 progress.className="audio-progress";
 
-// tempo
 const time=document.createElement("span");
 time.className="audio-time";
 time.innerText="0:00";
 
-// áudio
 const audio=new Audio(src);
 
 audio.addEventListener("loadedmetadata",()=>{
@@ -261,17 +248,12 @@ buffer=[];
 
 let i=0;
 
-function nextMessage(){
+function continueMessages(){
 
 if(i>=chunks.length){
 if(nextOptions){renderOptions(nextOptions)}
 else{showPlanImage()}
 return;
-}
-
-// 🔥 AUDIO AQUI
-if(i===0 && audioSrc){
-addAudioMessage(audioSrc);
 }
 
 const typing=showTyping();
@@ -280,8 +262,39 @@ setTimeout(()=>{
 typing.remove();
 addMessage(chunks[i],"bot");
 i++;
-setTimeout(nextMessage,2000);
+setTimeout(continueMessages,2000);
 },1500);
+}
+
+function nextMessage(){
+
+if(i>=chunks.length){
+if(nextOptions){renderOptions(nextOptions)}
+else{showPlanImage()}
+return;
+}
+
+// fluxo com áudio
+if(i===0 && audioSrc){
+
+const rec = showRecording();
+
+setTimeout(()=>{
+rec.remove();
+addAudioMessage(audioSrc);
+
+// 🔥 delay pós áudio
+setTimeout(()=>{
+continueMessages();
+},3000);
+
+},5000);
+
+return;
+}
+
+// fallback
+continueMessages();
 }
 
 nextMessage();
