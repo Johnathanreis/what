@@ -7,96 +7,21 @@
 
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0b141a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .phone {
-      width: 100%;
-      max-width: 420px;
-      height: 100vh;
-      background: #efeae2;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      background: #075e54;
-      color: #fff;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .topbar img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .chat {
-      flex: 1;
-      padding: 12px;
-      overflow: auto;
-    }
-
-    .msg {
-      max-width: 80%;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 6px 0;
-      font-size: 14px;
-    }
-
-    .bot { background: #fff; }
-    .user { background: #dcf8c6; margin-left: auto; }
-
-    .options {
-      padding: 10px;
-    }
-
-    button {
-      width: 100%;
-      margin: 4px 0;
-      padding: 12px;
-      border-radius: 20px;
-      border: none;
-      background: #128c7e;
-      color: #fff;
-    }
-
-    .typing {
-      background: #fff;
-      padding: 10px;
-      border-radius: 10px;
-      width: 60px;
-      display: flex;
-      gap: 4px;
-    }
-
-    .typing div {
-      width: 6px;
-      height: 6px;
-      background: #999;
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
+    body { margin:0; font-family:Arial; background:#0b141a; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .phone { width:100%; max-width:420px; height:100vh; background:#efeae2; display:flex; flex-direction:column; }
+    .topbar { background:#075e54; color:#fff; padding:10px; display:flex; align-items:center; gap:10px; }
+    .topbar img { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .chat { flex:1; padding:12px; overflow:auto; }
+    .msg { max-width:80%; padding:10px; border-radius:10px; margin:6px 0; font-size:14px; white-space:pre-line; }
+    .bot { background:#fff; }
+    .user { background:#dcf8c6; margin-left:auto; }
+    .options { padding:10px; }
+    button { width:100%; margin:4px 0; padding:12px; border-radius:20px; border:none; background:#128c7e; color:#fff; cursor:pointer; }
+    .typing { background:#fff; padding:10px; border-radius:10px; width:60px; display:flex; gap:4px; }
+    .typing div { width:6px; height:6px; background:#999; border-radius:50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:.3;} 50%{opacity:1;} }
   </style>
 </head>
-
 <body>
 
 <div class="phone">
@@ -127,8 +52,6 @@ function addMessage(text, type){
   chat.scrollTop = chat.scrollHeight;
 }
 
-function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
 function showTyping(){
   const typing = document.createElement("div");
   typing.className = "typing";
@@ -136,72 +59,6 @@ function showTyping(){
   chat.appendChild(typing);
   chat.scrollTop = chat.scrollHeight;
   return typing;
-}
-
-function botFlow(messages, nextOptions, audioFile=null){
-
-  let i = 0;
-
-  function nextMessage(){
-
-    if(i >= messages.length){
-      renderOptions(nextOptions);
-      return;
-    }
-
-    // áudio fake
-    if(i === 0 && audioFile){
-      const audioMsg = document.createElement("div");
-      audioMsg.className = "msg bot";
-      audioMsg.innerHTML = "▶️ Áudio (0:12)";
-      chat.appendChild(audioMsg);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    const typing = showTyping();
-
-    setTimeout(()=>{
-      typing.remove();
-      addMessage(messages[i], "bot");
-      i++;
-
-      setTimeout(nextMessage, 3000);
-
-    }, 2000);
-  }
-
-  nextMessage();
-}
-
-  for(const msg of messages){
-
-    const typing = showTyping();
-    await delay(2000);
-
-    typing.remove();
-    addMessage(msg, "bot");
-
-    await delay(3000);
-  }
-
-  renderOptions(nextOptions);
-}
-
-  for(const msg of messages){
-
-    const typing = showTyping();
-    await delay(2000);
-
-    typing.remove();
-    addMessage(msg, "bot");
-
-    await delay(3000);
-  }
-
-  renderOptions(nextOptions);
-}
-
-  renderOptions(nextOptions);
 }
 
 function renderOptions(opts){
@@ -219,6 +76,87 @@ function renderOptions(opts){
 
     options.appendChild(btn);
   });
+}
+
+function showPlanImage(){
+  options.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src = "planos.png";
+  img.style.width = "100%";
+  img.style.borderRadius = "10px";
+  img.style.marginBottom = "10px";
+
+  options.appendChild(img);
+
+  const planos = [
+    {label:"1 MÊS", value:"1"},
+    {label:"2 MESES", value:"2"},
+    {label:"3 MESES", value:"3"}
+  ];
+
+  planos.forEach(p=>{
+    const btn = document.createElement("button");
+    btn.innerText = "Escolher " + p.label;
+
+    btn.onclick = ()=>{
+      addMessage(p.label, "user");
+      flows.redirect(p.value);
+    };
+
+    options.appendChild(btn);
+  });
+}
+
+function botFlow(messages, nextOptions){
+
+  const chunks = [];
+  let buffer = [];
+
+  const isQuestion = (t)=> t.trim().endsWith("?");
+
+  messages.forEach((m,i)=>{
+    if(isQuestion(m)){
+      if(buffer.length){ chunks.push(buffer.join("\n")); buffer=[]; }
+      chunks.push(m);
+    } else {
+      buffer.push(m);
+      const next = messages[i+1];
+      if(!next || isQuestion(next)){
+        chunks.push(buffer.join("\n"));
+        buffer=[];
+      }
+    }
+  });
+
+  let i = 0;
+
+  function nextMessage(){
+
+    if(i >= chunks.length){
+      if(nextOptions){ renderOptions(nextOptions); }
+      else { showPlanImage(); }
+      return;
+    }
+
+    if(i === 0){
+      const audioMsg = document.createElement("div");
+      audioMsg.className = "msg bot";
+      audioMsg.innerHTML = "▶️ Áudio (0:12)";
+      chat.appendChild(audioMsg);
+    }
+
+    const typing = showTyping();
+
+    setTimeout(()=>{
+      typing.remove();
+      addMessage(chunks[i], "bot");
+      i++;
+      setTimeout(nextMessage, 3000);
+    }, 2000);
+  }
+
+  nextMessage();
 }
 
 const flows = {
@@ -268,13 +206,18 @@ const flows = {
     "Você recebe em casa.",
     "Em embalagem discreta.",
     "E paga só na entrega.",
-    "Quer solicitar agora?"
-  ],[
-    {label:"Quero receber", next:"redirect"}
-  ]),
+    "Sem risco.",
+    "Agora escolha a duração do tratamento:"
+  ], null),
 
-  redirect: ()=>{
-    window.location.href = "https://SEU-LINK-AQUI.com";
+  redirect: (plano)=>{
+    const links = {
+      "1": "https://entrega.logzz.com.br/pay/mem4k2o0/principal-selecao-estimulus---valor-199",
+      "2": "https://entrega.logzz.com.br/pay/mem4k2o0/principal-selecao-estimulus---2-no-valor-199",
+      "3": "https://entrega.logzz.com.br/pay/mem4k2o0/principal-selecao-estimulus---3-no-valor-269"
+    };
+
+    window.location.href = links[plano];
   }
 
 };
