@@ -15,7 +15,7 @@ body{margin:0;font-family:Arial;background:#0b141a;display:flex;justify-content:
 
 .chat{flex:1;padding:12px;overflow:auto}
 
-.msg{max-width:85%;margin:6px 0;font-size:14px;white-space:pre-line}
+.msg{max-width:85%;margin:6px 0;font-size:14px}
 .bot{background:#fff;border-radius:12px;padding:10px}
 .user{background:#dcf8c6;margin-left:auto;border-radius:12px;padding:10px}
 
@@ -43,7 +43,7 @@ cursor:pointer
 .audio-box{flex:1;background:#e4e6eb;border-radius:18px;padding:10px 12px;display:flex;align-items:center;gap:10px}
 .audio-play{border:none;background:none;font-size:22px;cursor:pointer;color:#128c7e}
 .audio-progress{flex:1;accent-color:#128c7e}
-.audio-time{font-size:12px;color:#555;min-width:40px;text-align:right}
+.audio-time{font-size:12px;color:#555}
 
 /* recording */
 .recording{display:flex;align-items:center;gap:10px;background:#e4e6eb;border-radius:18px;padding:10px 12px}
@@ -81,26 +81,14 @@ cursor:pointer
 const chat = document.getElementById("chat");
 const options = document.getElementById("options");
 
+// contador de áudios
+let audioCount = 0;
+
 function addMessage(text,type){
 const div=document.createElement("div");
 div.className="msg "+type;
 div.innerText=text;
 chat.appendChild(div);
-chat.scrollTop=chat.scrollHeight;
-}
-
-// 🔥 IMAGEM DO PLANO
-function showPlanBanner(){
-const wrapper=document.createElement("div");
-wrapper.className="msg bot";
-
-const img=document.createElement("img");
-img.src="plano.png";
-img.style.width="100%";
-img.style.borderRadius="12px";
-
-wrapper.appendChild(img);
-chat.appendChild(wrapper);
 chat.scrollTop=chat.scrollHeight;
 }
 
@@ -125,7 +113,6 @@ wave.appendChild(document.createElement("div"));
 
 const text=document.createElement("span");
 text.innerText="gravando áudio...";
-text.style.fontSize="12px";
 
 rec.appendChild(wave);
 rec.appendChild(text);
@@ -161,7 +148,6 @@ progress.className="audio-progress";
 
 const time=document.createElement("span");
 time.className="audio-time";
-time.innerText="0:00";
 
 const audio=new Audio(src);
 
@@ -199,7 +185,6 @@ const typing=document.createElement("div");
 typing.className="typing";
 typing.innerHTML="<div></div><div></div><div></div>";
 chat.appendChild(typing);
-chat.scrollTop=chat.scrollHeight;
 return typing;
 }
 
@@ -227,31 +212,14 @@ oferta:"audio5.mp3"
 
 function botFlow(messages,nextOptions,audioSrc){
 
-const chunks=[];
-let buffer=[];
-const isQuestion=(t)=>t.trim().endsWith("?");
-
-messages.forEach((m,i)=>{
-if(isQuestion(m)){
-if(buffer.length){chunks.push(buffer.join("\n"));buffer=[]}
-chunks.push(m);
-}else{
-buffer.push(m);
-const next=messages[i+1];
-if(!next||isQuestion(next)){
-chunks.push(buffer.join("\n"));
-buffer=[];
-}
-}
-});
+audioCount++;
 
 let i=0;
 
 function continueMessages(){
 
-if(i>=chunks.length){
+if(i>=messages.length){
 if(nextOptions){renderOptions(nextOptions)}
-else{showPlanImage()}
 return;
 }
 
@@ -259,19 +227,13 @@ const typing=showTyping();
 
 setTimeout(()=>{
 typing.remove();
-addMessage(chunks[i],"bot");
+addMessage(messages[i],"bot");
 i++;
 setTimeout(continueMessages,2000);
 },1500);
 }
 
 function nextMessage(){
-
-if(i>=chunks.length){
-if(nextOptions){renderOptions(nextOptions)}
-else{showPlanImage()}
-return;
-}
 
 if(i===0 && audioSrc){
 
@@ -281,9 +243,12 @@ setTimeout(()=>{
 rec.remove();
 addAudioMessage(audioSrc);
 
+// 🔥 delay inteligente
+const delay = audioCount === 1 ? 3000 : 26000;
+
 setTimeout(()=>{
 continueMessages();
-},3000);
+},delay);
 
 },5000);
 
@@ -294,36 +259,6 @@ continueMessages();
 }
 
 nextMessage();
-}
-
-// 🔥 FINAL COM IMAGEM
-function showPlanImage(){
-
-options.innerHTML="";
-
-showPlanBanner();
-
-setTimeout(()=>{
-
-addMessage("Escolha seu tratamento:","bot");
-
-const planos=[
-{label:"1 MES",value:"1"},
-{label:"2 MESES",value:"2"},
-{label:"3 MESES",value:"3"}
-];
-
-planos.forEach(p=>{
-const btn=document.createElement("button");
-btn.innerText="Escolher "+p.label;
-btn.onclick=()=>{
-addMessage(p.label,"user");
-flows.redirect(p.value);
-};
-options.appendChild(btn);
-});
-
-},1500);
 }
 
 const flows={
