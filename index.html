@@ -79,6 +79,7 @@ const options = document.getElementById("options");
 
 let audioCount = 0;
 
+// mensagem
 function addMessage(text,type){
 const div=document.createElement("div");
 div.className="msg "+type;
@@ -87,7 +88,7 @@ chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
 }
 
-// imagem
+// imagem plano
 function showPlanBanner(){
 const wrapper=document.createElement("div");
 wrapper.className="msg bot";
@@ -103,7 +104,6 @@ chat.appendChild(wrapper);
 
 // final direto
 function showPlanImage(){
-
 options.innerHTML="";
 
 showPlanBanner();
@@ -136,7 +136,6 @@ options.appendChild(btn);
 });
 
 },1200);
-
 }
 
 // gravação
@@ -167,8 +166,9 @@ chat.appendChild(wrapper);
 return wrapper;
 }
 
-// audio
+// 🔥 AUDIO CORRIGIDO
 function addAudioMessage(src){
+
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -185,16 +185,58 @@ playBtn.innerText="▶";
 
 const progress=document.createElement("input");
 progress.type="range";
+progress.value=0;
+progress.min=0;
+progress.max=100;
+progress.step=0.1;
 progress.className="audio-progress";
 
 const time=document.createElement("span");
 time.className="audio-time";
+time.innerText="0:00";
 
 const audio=new Audio(src);
+audio.preload="metadata";
 
+// duração
+audio.addEventListener("loadedmetadata",()=>{
+if(!isNaN(audio.duration)){
+const min=Math.floor(audio.duration/60);
+const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
+time.innerText=`${min}:${sec}`;
+}
+});
+
+// progresso funcionando
+audio.addEventListener("timeupdate",()=>{
+if(audio.duration){
+progress.value=(audio.currentTime/audio.duration)*100;
+}
+});
+
+// arrastar
+progress.addEventListener("input",()=>{
+if(audio.duration){
+audio.currentTime=(progress.value/100)*audio.duration;
+}
+});
+
+// play
 playBtn.onclick=()=>{
-audio.paused?(audio.play(),playBtn.innerText="⏸"):(audio.pause(),playBtn.innerText="▶");
+if(audio.paused){
+audio.play();
+playBtn.innerText="⏸";
+}else{
+audio.pause();
+playBtn.innerText="▶";
+}
 };
+
+// reset
+audio.addEventListener("ended",()=>{
+playBtn.innerText="▶";
+progress.value=0;
+});
 
 audioBox.append(playBtn,progress,time);
 wrapper.append(avatar,audioBox);
@@ -203,7 +245,7 @@ chat.appendChild(wrapper);
 return audio;
 }
 
-// fluxo
+// opções
 function renderOptions(opts){
 options.innerHTML="";
 opts.forEach(o=>{
@@ -218,6 +260,7 @@ options.appendChild(btn);
 });
 }
 
+// audios
 const audioMap={
 start:"audio1.mp3",
 q1:"audio2.mp3",
@@ -226,19 +269,18 @@ q3:"audio4.mp3",
 oferta:"audio5.mp3"
 };
 
+// fluxo
 function botFlow(messages,nextOptions,audioSrc){
 
 audioCount++;
 let i=0;
 
 function continueMessages(){
-
 if(i>=messages.length){
 if(nextOptions){renderOptions(nextOptions)}
 else{showPlanImage()}
 return;
 }
-
 addMessage(messages[i],"bot");
 i++;
 setTimeout(continueMessages,1500);
@@ -254,7 +296,7 @@ setTimeout(()=>{
 rec.remove();
 addAudioMessage(audioSrc);
 
-// 🔥 DELAY AJUSTADO
+// 🔥 DELAY FINAL AJUSTADO
 const delay = audioCount === 1 ? 3000 : 18000;
 
 setTimeout(()=>{
@@ -272,6 +314,7 @@ continueMessages();
 nextMessage();
 }
 
+// flows
 const flows={
 
 start:()=>botFlow([
