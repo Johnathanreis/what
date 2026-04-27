@@ -138,18 +138,40 @@ function showTyping(){
   return typing;
 }
 
-async function botFlow(messages, nextOptions, audioFile=null){
+function botFlow(messages, nextOptions, audioFile=null){
 
-  // 🔊 simulação de áudio estilo WhatsApp
-  if(audioFile){
-    const audioMsg = document.createElement("div");
-    audioMsg.className = "msg bot";
-    audioMsg.innerHTML = "▶️ Áudio (0:12)";
-    chat.appendChild(audioMsg);
-    chat.scrollTop = chat.scrollHeight;
+  let i = 0;
 
-    await delay(3000);
+  function nextMessage(){
+
+    if(i >= messages.length){
+      renderOptions(nextOptions);
+      return;
+    }
+
+    // áudio fake
+    if(i === 0 && audioFile){
+      const audioMsg = document.createElement("div");
+      audioMsg.className = "msg bot";
+      audioMsg.innerHTML = "▶️ Áudio (0:12)";
+      chat.appendChild(audioMsg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    const typing = showTyping();
+
+    setTimeout(()=>{
+      typing.remove();
+      addMessage(messages[i], "bot");
+      i++;
+
+      setTimeout(nextMessage, 3000);
+
+    }, 2000);
   }
+
+  nextMessage();
+}
 
   for(const msg of messages){
 
