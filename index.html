@@ -89,12 +89,13 @@ options.appendChild(btn);
 });
 }
 
+// 🔥 CAMINHO CORRIGIDO
 const audioMap={
-start:"audios/audio1.mp3",
-q1:"audios/audio2.mp3",
-q2:"audios/audio3.mp3",
-q3:"audios/audio4.mp3",
-oferta:"audios/audio5.mp3"
+start:"audio1.mp3",
+q1:"audio2.mp3",
+q2:"audio3.mp3",
+q3:"audio4.mp3",
+oferta:"audio5.mp3"
 };
 
 function botFlow(messages,nextOptions,audioSrc){
@@ -127,6 +128,7 @@ else{showPlanImage()}
 return;
 }
 
+// 🔥 AUDIO REAL
 if(i===0 && audioSrc){
 addAudioMessage(audioSrc);
 }
