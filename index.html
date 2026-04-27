@@ -4,32 +4,118 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Atendimento Urológico</title>
+
   <style>
-    body { margin:0; font-family:Arial; background:#0b141a; display:flex; justify-content:center; }
-    .phone { width:100%; max-width:420px; height:100vh; background:#efeae2; display:flex; flex-direction:column; }
-    .topbar { background:#075e54; color:#fff; padding:12px; font-weight:bold; }
-    .chat { flex:1; padding:12px; overflow:auto; }
-    .msg { max-width:80%; padding:10px; border-radius:10px; margin:6px 0; font-size:14px; }
-    .bot { background:#fff; }
-    .user { background:#dcf8c6; margin-left:auto; }
-    .options { padding:10px; }
-    button { width:100%; margin:4px 0; padding:12px; border-radius:20px; border:none; background:#128c7e; color:#fff; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0b141a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      background: #efeae2;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: #075e54;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 12px;
+      overflow: auto;
+    }
+
+    .msg {
+      max-width: 80%;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .bot { background: #fff; }
+    .user { background: #dcf8c6; margin-left: auto; }
+
+    .options {
+      padding: 10px;
+    }
+
+    button {
+      width: 100%;
+      margin: 4px 0;
+      padding: 12px;
+      border-radius: 20px;
+      border: none;
+      background: #128c7e;
+      color: #fff;
+    }
+
+    .typing {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      width: 60px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing div {
+      width: 6px;
+      height: 6px;
+      background: #999;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
   </style>
 </head>
+
 <body>
+
 <div class="phone">
-  <div class="topbar" style="display:flex; align-items:center; gap:10px;">
-  <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200&auto=format&fit=crop" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-  <div>
-    <div>Dr. Rafael • Urologia</div>
-    <small style="font-size:11px; opacity:0.8;">online agora</small>
+
+  <div class="topbar">
+    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200&auto=format&fit=crop">
+    <div>
+      <div><strong>Dr. Rafael • Urologia</strong></div>
+      <small>online agora</small>
+    </div>
   </div>
-</div>
+
   <div id="chat" class="chat"></div>
   <div id="options" class="options"></div>
+
 </div>
 
 <script>
+
 const chat = document.getElementById("chat");
 const options = document.getElementById("options");
 
@@ -43,101 +129,124 @@ function addMessage(text, type){
 
 function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-async function botFlow(messages, nextOptions){
-  for(let i = 0; i < messages.length; i++){
-    const msg = messages[i];
+function showTyping(){
+  const typing = document.createElement("div");
+  typing.className = "typing";
+  typing.innerHTML = "<div></div><div></div><div></div>";
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+  return typing;
+}
 
-    // typing indicator
-    const typing = document.createElement("div");
-    typing.className = "msg bot";
-    typing.innerText = "digitando...";
-    chat.appendChild(typing);
+async function botFlow(messages, nextOptions, audioFile=null){
+
+  // 🔊 simulação de áudio estilo WhatsApp
+  if(audioFile){
+    const audioMsg = document.createElement("div");
+    audioMsg.className = "msg bot";
+    audioMsg.innerHTML = "▶️ Áudio (0:12)";
+    chat.appendChild(audioMsg);
     chat.scrollTop = chat.scrollHeight;
 
-    await delay(5000);
+    await delay(3000);
+  }
+
+  for(const msg of messages){
+
+    const typing = showTyping();
+    await delay(2000);
 
     typing.remove();
-
-    // adiciona mensagem
     addMessage(msg, "bot");
 
-    // 🔥 garante pequeno delay entre mensagens para não colar tudo
-    if(i < messages.length - 1){
-      await delay(1500);
-    }
+    await delay(3000);
   }
 
   renderOptions(nextOptions);
 }
+
+  for(const msg of messages){
+
+    const typing = showTyping();
+    await delay(2000);
+
+    typing.remove();
+    addMessage(msg, "bot");
+
+    await delay(3000);
+  }
+
   renderOptions(nextOptions);
 }
+
   renderOptions(nextOptions);
 }
 
 function renderOptions(opts){
   options.innerHTML = "";
+
   opts.forEach(o=>{
     const btn = document.createElement("button");
     btn.innerText = o.label;
+
     btn.onclick = ()=>{
       addMessage(o.label, "user");
       options.innerHTML = "";
       flows[o.next]();
     };
+
     options.appendChild(btn);
   });
 }
 
 const flows = {
+
   start: ()=> botFlow([
     "Olá, sou o Dr. Rafael.",
-    "Vou te ajudar de forma rápida e discreta.",
+    "Vou te ajudar de forma discreta.",
     "Posso te fazer algumas perguntas?"
   ],[
-    {label:"Sim", next:"triagem1"},
-    {label:"Pode falar", next:"triagem1"}
+    {label:"Sim", next:"q1"}
   ]),
 
-  triagem1: ()=> botFlow([
-    "Isso vem acontecendo com frequência?"
+  q1: ()=> botFlow([
+    "Isso acontece com frequência?"
   ],[
-    {label:"Sim", next:"triagem2"},
-    {label:"Às vezes", next:"triagem2"}
+    {label:"Sim", next:"q2"},
+    {label:"Às vezes", next:"q2"}
   ]),
 
-  triagem2: ()=> botFlow([
+  q2: ()=> botFlow([
     "Entendi.",
-    "Isso já afetou sua confiança ou desempenho?"
+    "Isso afeta sua confiança?"
   ],[
-    {label:"Sim", next:"triagem3"},
-    {label:"Um pouco", next:"triagem3"}
+    {label:"Sim", next:"q3"},
+    {label:"Um pouco", next:"q3"}
   ]),
 
-  triagem3: ()=> botFlow([
+  q3: ()=> botFlow([
     "Certo.",
-    "Você busca uma solução discreta e segura?"
+    "Você quer resolver isso com discrição?"
   ],[
-    {label:"Sim", next:"interesse"},
-    {label:"Sim, com certeza", next:"interesse"}
+    {label:"Sim", next:"oferta"}
   ]),
 
-  interesse: ()=> botFlow([
+  oferta: ()=> botFlow([
     "Perfeito.",
-    "Existe um protocolo que tem ajudado muitos homens.",
-    "Totalmente discreto.",
+    "Existe um protocolo seguro.",
     "Sem exposição.",
-    "Quer entender como funciona?"
+    "Entrega discreta.",
+    "Quer ver como funciona?"
   ],[
-    {label:"Quero entender", next:"final"}
+    {label:"Quero ver", next:"final"}
   ]),
 
   final: ()=> botFlow([
     "Funciona assim.",
-    "Você recebe o produto na sua casa.",
-    "Em embalagem totalmente discreta.",
-    "E só paga no momento da entrega.",
-    "Sem risco.",
-    "Quer solicitar o seu agora?"
+    "Você recebe em casa.",
+    "Em embalagem discreta.",
+    "E paga só na entrega.",
+    "Quer solicitar agora?"
   ],[
     {label:"Quero receber", next:"redirect"}
   ]),
@@ -145,9 +254,12 @@ const flows = {
   redirect: ()=>{
     window.location.href = "https://SEU-LINK-AQUI.com";
   }
+
 };
 
 flows.start();
+
 </script>
+
 </body>
 </html>
