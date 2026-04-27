@@ -89,6 +89,21 @@ chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
 }
 
+// 🔥 IMAGEM DO PLANO
+function showPlanBanner(){
+const wrapper=document.createElement("div");
+wrapper.className="msg bot";
+
+const img=document.createElement("img");
+img.src="plano.png";
+img.style.width="100%";
+img.style.borderRadius="12px";
+
+wrapper.appendChild(img);
+chat.appendChild(wrapper);
+chat.scrollTop=chat.scrollHeight;
+}
+
 // gravação
 function showRecording(){
 const wrapper=document.createElement("div");
@@ -105,8 +120,7 @@ const wave=document.createElement("div");
 wave.className="recording-wave";
 
 for(let i=0;i<4;i++){
-const bar=document.createElement("div");
-wave.appendChild(bar);
+wave.appendChild(document.createElement("div"));
 }
 
 const text=document.createElement("span");
@@ -125,9 +139,8 @@ chat.scrollTop=chat.scrollHeight;
 return wrapper;
 }
 
-// audio
+// áudio
 function addAudioMessage(src){
-
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -144,9 +157,6 @@ playBtn.innerText="▶";
 
 const progress=document.createElement("input");
 progress.type="range";
-progress.value=0;
-progress.min=0;
-progress.max=100;
 progress.className="audio-progress";
 
 const time=document.createElement("span");
@@ -162,13 +172,7 @@ time.innerText=`${min}:${sec}`;
 });
 
 playBtn.onclick=()=>{
-if(audio.paused){
-audio.play();
-playBtn.innerText="⏸";
-}else{
-audio.pause();
-playBtn.innerText="▶";
-}
+audio.paused?(audio.play(),playBtn.innerText="⏸"):(audio.pause(),playBtn.innerText="▶");
 };
 
 audio.addEventListener("timeupdate",()=>{
@@ -184,13 +188,8 @@ playBtn.innerText="▶";
 progress.value=0;
 });
 
-audioBox.appendChild(playBtn);
-audioBox.appendChild(progress);
-audioBox.appendChild(time);
-
-wrapper.appendChild(avatar);
-wrapper.appendChild(audioBox);
-
+audioBox.append(playBtn,progress,time);
+wrapper.append(avatar,audioBox);
 chat.appendChild(wrapper);
 chat.scrollTop=chat.scrollHeight;
 }
@@ -274,7 +273,6 @@ else{showPlanImage()}
 return;
 }
 
-// fluxo com áudio
 if(i===0 && audioSrc){
 
 const rec = showRecording();
@@ -283,7 +281,6 @@ setTimeout(()=>{
 rec.remove();
 addAudioMessage(audioSrc);
 
-// 🔥 delay pós áudio
 setTimeout(()=>{
 continueMessages();
 },3000);
@@ -293,20 +290,22 @@ continueMessages();
 return;
 }
 
-// fallback
 continueMessages();
 }
 
 nextMessage();
 }
 
+// 🔥 FINAL COM IMAGEM
 function showPlanImage(){
+
 options.innerHTML="";
 
-addMessage(
-"Escolha seu tratamento:\n\n1 MES - R$164\n2 MESES - R$199\n3 MESES - R$297",
-"bot"
-);
+showPlanBanner();
+
+setTimeout(()=>{
+
+addMessage("Escolha seu tratamento:","bot");
 
 const planos=[
 {label:"1 MES",value:"1"},
@@ -323,6 +322,8 @@ flows.redirect(p.value);
 };
 options.appendChild(btn);
 });
+
+},1500);
 }
 
 const flows={
