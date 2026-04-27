@@ -75,6 +75,12 @@ border-radius:16px;
 padding:16px;
 }
 
+/* 🔥 REMOVE FUNDO DO ÁUDIO */
+.audio-message.bot{
+background:transparent !important;
+padding:0 !important;
+}
+
 /* BOTÕES */
 .options{
 padding:16px;
@@ -215,13 +221,12 @@ chat.scrollTop=chat.scrollHeight;
 return div;
 }
 
-/* MENSAGEM COM DELAY */
+/* MENSAGEM */
 function addMessage(text,type){
 
 const typing = showTyping();
 
 setTimeout(()=>{
-
 typing.remove();
 
 const div=document.createElement("div");
@@ -479,13 +484,12 @@ q3:()=>botFlow([
 "Voce quer resolver isso com discricao?"
 ],[{label:"Sim",next:"oferta"}],audioMap.q3),
 
-oferta:()=>botFlow([
-"Perfeito.",
-"Existe um protocolo seguro.",
-"Sem exposicao.",
-"Entrega discreta.",
-"Quer ver como funciona?"
-],[{label:"Quero ver",next:"final"}],audioMap.oferta),
+/* 🔥 ALTERADO */
+oferta:()=>botFlow(
+[],
+[{label:"Quero ver",next:"final"}],
+audioMap.oferta
+),
 
 final:()=>{
 showPlanImage();
