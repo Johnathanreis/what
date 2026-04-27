@@ -28,7 +28,6 @@ display:flex;
 flex-direction:column;
 }
 
-/* TOPBAR */
 .topbar{
 background:#075e54;
 color:#fff;
@@ -46,14 +45,12 @@ border-radius:50%;
 object-fit:cover;
 }
 
-/* CHAT */
 .chat{
 flex:1;
 padding:16px;
 overflow:auto;
 }
 
-/* MENSAGENS */
 .msg{
 max-width:85%;
 margin:10px 0;
@@ -75,13 +72,12 @@ border-radius:16px;
 padding:16px;
 }
 
-/* 🔥 REMOVE FUNDO DO ÁUDIO */
+/* 🔥 remove fundo branco do áudio */
 .audio-message.bot{
 background:transparent !important;
 padding:0 !important;
 }
 
-/* BOTÕES */
 .options{
 padding:16px;
 }
@@ -104,7 +100,6 @@ transform:scale(0.97);
 opacity:0.9;
 }
 
-/* AUDIO */
 .audio-message{
 display:flex;
 align-items:flex-end;
@@ -149,7 +144,6 @@ min-width:45px;
 text-align:right;
 }
 
-/* GRAVAÇÃO */
 .recording{
 display:flex;
 align-items:center;
@@ -171,10 +165,6 @@ height:12px;
 background:#999;
 animation:wave 1s infinite ease-in-out;
 }
-
-.recording-wave div:nth-child(2){animation-delay:.2s}
-.recording-wave div:nth-child(3){animation-delay:.4s}
-.recording-wave div:nth-child(4){animation-delay:.6s}
 
 @keyframes wave{
 0%,100%{transform:scaleY(.5)}
@@ -211,7 +201,6 @@ const options = document.getElementById("options");
 
 let audioCount = 0;
 
-/* DIGITANDO */
 function showTyping(){
 const div=document.createElement("div");
 div.className="msg bot";
@@ -221,9 +210,7 @@ chat.scrollTop=chat.scrollHeight;
 return div;
 }
 
-/* MENSAGEM */
 function addMessage(text,type){
-
 const typing = showTyping();
 
 setTimeout(()=>{
@@ -239,7 +226,6 @@ chat.scrollTop=chat.scrollHeight;
 },600);
 }
 
-/* PLANO */
 function showPlanBanner(){
 const wrapper=document.createElement("div");
 wrapper.className="msg bot";
@@ -255,7 +241,6 @@ chat.appendChild(wrapper);
 
 function showPlanImage(){
 options.innerHTML="";
-
 showPlanBanner();
 
 setTimeout(()=>{
@@ -289,7 +274,6 @@ options.appendChild(btn);
 },1200);
 }
 
-/* GRAVAÇÃO */
 function showRecording(){
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
@@ -317,9 +301,7 @@ chat.appendChild(wrapper);
 return wrapper;
 }
 
-/* AUDIO */
 function addAudioMessage(src){
-
 const wrapper=document.createElement("div");
 wrapper.className="msg bot audio-message";
 
@@ -336,10 +318,6 @@ playBtn.innerText="▶";
 
 const progress=document.createElement("input");
 progress.type="range";
-progress.value=0;
-progress.min=0;
-progress.max=100;
-progress.step=0.1;
 progress.className="audio-progress";
 
 const time=document.createElement("span");
@@ -348,23 +326,9 @@ time.innerText="0:00";
 
 const audio=new Audio(src);
 
-audio.addEventListener("loadedmetadata",()=>{
-if(!isNaN(audio.duration)){
-const min=Math.floor(audio.duration/60);
-const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
-time.innerText=`${min}:${sec}`;
-}
-});
-
 audio.addEventListener("timeupdate",()=>{
 if(audio.duration){
 progress.value=(audio.currentTime/audio.duration)*100;
-}
-});
-
-progress.addEventListener("input",()=>{
-if(audio.duration){
-audio.currentTime=(progress.value/100)*audio.duration;
 }
 });
 
@@ -378,37 +342,11 @@ playBtn.innerText="▶";
 }
 };
 
-audio.addEventListener("ended",()=>{
-playBtn.innerText="▶";
-progress.value=0;
-});
-
 audioBox.append(playBtn,progress,time);
 wrapper.append(avatar,audioBox);
 chat.appendChild(wrapper);
-
-return audio;
 }
 
-/* OPÇÕES */
-function renderOptions(opts){
-options.innerHTML="";
-opts.forEach(o=>{
-const btn=document.createElement("button");
-btn.innerText=o.label;
-
-btn.onclick=()=>{
-if(navigator.vibrate){navigator.vibrate(30);}
-addMessage(o.label,"user");
-options.innerHTML="";
-flows[o.next]();
-};
-
-options.appendChild(btn);
-});
-}
-
-/* AUDIOS */
 const audioMap={
 start:"audio1.mp3",
 q1:"audio2.mp3",
@@ -417,7 +355,6 @@ q3:"audio4.mp3",
 oferta:"audio5.mp3"
 };
 
-/* FLUXO */
 function botFlow(messages,nextOptions,audioSrc){
 
 audioCount++;
@@ -461,7 +398,7 @@ continueMessages();
 nextMessage();
 }
 
-/* FLOWS */
+/* 🔥 ALTERAÇÃO PRINCIPAL */
 const flows={
 
 start:()=>botFlow([
@@ -484,16 +421,8 @@ q3:()=>botFlow([
 "Voce quer resolver isso com discricao?"
 ],[{label:"Sim",next:"oferta"}],audioMap.q3),
 
-/* 🔥 ALTERADO */
-oferta:()=>botFlow(
-[],
-[{label:"Quero ver",next:"final"}],
-audioMap.oferta
-),
-
-final:()=>{
-showPlanImage();
-},
+/* 🔥 DIRETO PARA O PLANO */
+oferta:()=>botFlow([],null,audioMap.oferta),
 
 redirect:(plano)=>{
 const links={
