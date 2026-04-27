@@ -35,7 +35,7 @@ function addMessage(text, type){
   chat.scrollTop = chat.scrollHeight;
 }
 
-function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function delay(ms){ return new Promise(r=>setTimeout(r,5000)); }
 
 async function botFlow(messages, nextOptions){
   for(const msg of messages){
@@ -60,117 +60,55 @@ function renderOptions(opts){
 }
 
 const flows = {
-      start: {
-        bot: [
-          { text: "Olá. Posso te ajudar rápido.", audio: "01-boas-vindas.mp3" },
-          { text: "É algo recente ou já vem acontecendo?" }
-        ],
-        options: [
-          { label: "Recente", next: "controle" },
-          { label: "Já acontece há um tempo", next: "controle" }
-        ]
-      },
-      controle: {
-        user: "Controle",
-        bot: [
-          { text: "Entendi.", audio: "02-controle.mp3" },
-          { text: "Isso impacta sua confiança hoje?" }
-        ],
-        options: [
-          { label: "Sim", next: "tempo_meses" },
-          { label: "Às vezes", next: "tempo_recente" }
-        ]
-      },
-      firmeza: {
-        user: "Firmeza",
-        bot: [
-          { text: "Certo.", audio: "03-firmeza.mp3" },
-          { text: "Você quer resolver isso de forma discreta?" }
-        ],
-        options: [
-          { label: "Sim", next: "frequencia_frequente" },
-          { label: "Talvez", next: "frequencia_asvezes" }
-        ]
-      },
-      energia: {
-        user: "Energia",
-        bot: [
-          { text: "Perfeito.", audio: "04-energia.mp3" },
-          { text: "Você sente queda de disposição com frequência?" }
-        ],
-        options: [
-          { label: "Sim", next: "disposicao" },
-          { label: "Não", next: "rotina" }
-        ]
-      },
-      geral: {
-        user: "Geral",
-        bot: [
-          { text: "Vamos direto ao ponto.", audio: "05-geral.mp3" },
-          { text: "Você usa algum medicamento contínuo?" }
-        ],
-        options: [
-          { label: "Não", next: "sem_risco" },
-          { label: "Sim", next: "risco" }
-        ]
-      },
-      tempo_recente: makeMiddle("Isso começou agora. Quer evitar que vire rotina?"),
-      tempo_meses: makeMiddle("Já vem acontecendo. Quer resolver isso de vez?"),
-      tempo_longo: makeMiddle("É recorrente. Quer mudar esse cenário?"),
-      frequencia_asvezes: makeMiddle("Acontece às vezes. Quer mais controle?"),
-      frequencia_frequente: makeMiddle("É frequente. Quer resolver com segurança?"),
-      discreto: makeMiddle("Tudo discreto. Podemos seguir?"),
-      rotina: makeMiddle("Rotina pesa. Quer melhorar sua performance?"),
-      disposicao: makeMiddle("Queda constante. Quer recuperar energia?"),
-      performance: makeMiddle("Busca performance. Quer um protocolo?"),
-      sem_risco: {
-        user: "Não",
-        bot: [
-          { text: "Ótimo.", audio: "08-recomendacao.mp3" },
-          { text: "Posso te mostrar uma recomendação?" }
-        ],
-        options: [
-          { label: "Quero ver", next: "final" },
-          { label: "Falar com atendimento", next: "whatsapp" }
-        ]
-      },
-      risco: {
-        user: "Sim",
-        bot: [
-          { text: "Melhor avaliar antes.", audio: "09-seguranca.mp3" },
-          { text: "Quer falar com atendimento agora?" }
-        ],
-        options: [
-          { label: "Falar com atendimento", next: "whatsapp" },
-          { label: "Refazer", next: "restart" }
-        ]
-      },
-      final: {
-        user: "Quero ver",
-        bot: [
-          { text: "Aqui está.", audio: "10-final.mp3" },
-          { text: "Quer acessar agora?" }
-        ],
-        options: [
-          { label: "Acessar", type: "checkout" },
-          { label: "Falar antes", type: "whatsapp" }
-        ]
-      },
-      whatsapp: {
-        user: "Atendimento",
-        bot: [
-          { text: "Te direciono agora." }
-        ],
-        options: [
-          { label: "Abrir WhatsApp", type: "whatsapp" }
-        ]
-      },
-      restart: {
-        user: "Refazer",
-        bot: [],
-        options: []
-      }
-    };
+  start: ()=> botFlow([
+    "Vou ser direto...",
+    "Isso já aconteceu mais de uma vez?"
+  ],[
+    {label:"Sim", next:"freq"},
+    {label:"Não", next:"pontual"}
+  ]),
+
+  freq: ()=> botFlow([
+    "Entendi.",
+    "Isso mexe com sua confiança?",
+    "Se tivesse solução discreta, testaria?"
+  ],[
+    {label:"Sim", next:"interesse"},
+    {label:"Talvez", next:"interesse"}
+  ]),
+
+  pontual: ()=> botFlow([
+    "Ok.",
+    "Mas você quer evitar que isso volte?",
+    "Prefere prevenir antes de piorar?"
+  ],[
+    {label:"Sim", next:"interesse"},
+    {label:"Sim, prevenir", next:"interesse"}
+  ]),
+
+  interesse: ()=> botFlow([
+    "Perfeito.",
+    "Existe um protocolo discreto que muitos estão usando.",
+    "Sem exposição.",
+    "Pagamento só na entrega.",
+    "Quer ver como funciona?"
+  ],[
+    {label:"Quero ver", next:"final"}
+  ]),
+
+  final: ()=> botFlow([
+    "Aqui está.",
+    "Entrega sigilosa.",
+    "Você só paga quando receber.",
+    "Quer garantir o seu agora?"
+  ],[
+    {label:"Quero receber", next:"redirect"}
+  ]),
+
+  redirect: ()=>{
+    window.location.href = "https://SEU-LINK-AQUI.com";
+  }
+};
 
 flows.start();
 </script>
