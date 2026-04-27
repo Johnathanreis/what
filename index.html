@@ -11,15 +11,95 @@ body{margin:0;font-family:Arial;background:#0b141a;display:flex;justify-content:
 .phone{width:100%;max-width:420px;height:100vh;background:#efeae2;display:flex;flex-direction:column}
 .topbar{background:#075e54;color:#fff;padding:10px;display:flex;align-items:center;gap:10px}
 .topbar img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+
 .chat{flex:1;padding:12px;overflow:auto}
-.msg{max-width:80%;padding:10px;border-radius:10px;margin:6px 0;font-size:14px;white-space:pre-line}
-.bot{background:#fff}
-.user{background:#dcf8c6;margin-left:auto}
+
+.msg{max-width:85%;margin:6px 0;font-size:14px;white-space:pre-line}
+.bot{background:#fff;border-radius:12px;padding:10px}
+.user{background:#dcf8c6;margin-left:auto;border-radius:12px;padding:10px}
+
 .options{padding:10px}
-button{width:100%;margin:4px 0;padding:12px;border-radius:20px;border:none;background:#128c7e;color:#fff;cursor:pointer}
-.typing{background:#fff;padding:10px;border-radius:10px;width:60px;display:flex;gap:4px}
-.typing div{width:6px;height:6px;background:#999;border-radius:50%;animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+button{
+width:100%;
+margin:4px 0;
+padding:12px;
+border-radius:20px;
+border:none;
+background:#128c7e;
+color:#fff;
+cursor:pointer
+}
+
+.typing{
+background:#fff;
+padding:10px;
+border-radius:10px;
+width:60px;
+display:flex;
+gap:4px
+}
+
+.typing div{
+width:6px;
+height:6px;
+background:#999;
+border-radius:50%;
+animation:blink 1s infinite
+}
+
+@keyframes blink{
+0%,100%{opacity:.3}
+50%{opacity:1}
+}
+
+/* 🔥 AUDIO WHATSAPP */
+
+.audio-message{
+display:flex;
+align-items:flex-end;
+gap:10px;
+max-width:100%;
+}
+
+.audio-avatar{
+width:48px;
+height:48px;
+border-radius:50%;
+object-fit:cover;
+flex-shrink:0;
+}
+
+.audio-box{
+flex:1;
+background:#e4e6eb;
+border-radius:18px;
+padding:10px 12px;
+display:flex;
+align-items:center;
+gap:10px;
+min-height:48px;
+}
+
+.audio-play{
+border:none;
+background:none;
+font-size:18px;
+cursor:pointer;
+color:#128c7e;
+}
+
+.audio-progress{
+flex:1;
+accent-color:#128c7e;
+}
+
+.audio-time{
+font-size:12px;
+color:#555;
+min-width:40px;
+text-align:right;
+}
 </style>
 </head>
 <body>
@@ -52,39 +132,25 @@ chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
 }
 
-// 🔥 AUDIO ESTILO WHATSAPP
+// 🔥 AUDIO CORRIGIDO
 function addAudioMessage(src){
 
 const wrapper=document.createElement("div");
-wrapper.className="msg bot";
-wrapper.style.display="flex";
-wrapper.style.alignItems="flex-end";
-wrapper.style.gap="8px";
+wrapper.className="msg bot audio-message";
 
-// avatar
+// avatar grande e sem distorção
 const avatar=document.createElement("img");
-avatar.src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=200";
-avatar.style.width="32px";
-avatar.style.height="32px";
-avatar.style.borderRadius="50%";
+avatar.src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop";
+avatar.className="audio-avatar";
 
-// box audio
+// container áudio
 const audioBox=document.createElement("div");
-audioBox.style.background="#e5e5ea";
-audioBox.style.borderRadius="12px";
-audioBox.style.padding="8px 10px";
-audioBox.style.display="flex";
-audioBox.style.alignItems="center";
-audioBox.style.gap="8px";
-audioBox.style.maxWidth="220px";
+audioBox.className="audio-box";
 
-// botão play
+// play
 const playBtn=document.createElement("button");
+playBtn.className="audio-play";
 playBtn.innerText="▶";
-playBtn.style.border="none";
-playBtn.style.background="transparent";
-playBtn.style.fontSize="16px";
-playBtn.style.cursor="pointer";
 
 // barra
 const progress=document.createElement("input");
@@ -92,25 +158,22 @@ progress.type="range";
 progress.value=0;
 progress.min=0;
 progress.max=100;
-progress.style.flex="1";
+progress.className="audio-progress";
 
 // tempo
 const time=document.createElement("span");
+time.className="audio-time";
 time.innerText="0:00";
-time.style.fontSize="12px";
-time.style.color="#555";
 
-// áudio real
+// áudio
 const audio=new Audio(src);
 
-// duração
 audio.addEventListener("loadedmetadata",()=>{
 const min=Math.floor(audio.duration/60);
 const sec=Math.floor(audio.duration%60).toString().padStart(2,"0");
 time.innerText=`${min}:${sec}`;
 });
 
-// play/pause
 playBtn.onclick=()=>{
 if(audio.paused){
 audio.play();
@@ -121,17 +184,14 @@ playBtn.innerText="▶";
 }
 };
 
-// progresso
 audio.addEventListener("timeupdate",()=>{
 progress.value=(audio.currentTime/audio.duration)*100;
 });
 
-// arrastar
 progress.oninput=()=>{
 audio.currentTime=(progress.value/100)*audio.duration;
 };
 
-// reset
 audio.addEventListener("ended",()=>{
 playBtn.innerText="▶";
 progress.value=0;
@@ -171,7 +231,6 @@ options.appendChild(btn);
 });
 }
 
-// 🔥 CAMINHO CORRETO
 const audioMap={
 start:"audio1.mp3",
 q1:"audio2.mp3",
@@ -210,7 +269,7 @@ else{showPlanImage()}
 return;
 }
 
-// 🔥 AQUI ENTRA O AUDIO
+// 🔥 AUDIO AQUI
 if(i===0 && audioSrc){
 addAudioMessage(audioSrc);
 }
